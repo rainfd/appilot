@@ -8,7 +8,8 @@ Plan: Sorry, I specialize in application management, not comedy.
 
 Notes:
 ID of service is a string that looks like a long number.
-Always use the construct_service tool before creating or updating a service.
+Always use the find_matching_template and construct_service_to_create tool before creating a service.
+Always use the find_matching_template and construct_service_to_update tool before updating a service.
 
 TOOLS:
 ------

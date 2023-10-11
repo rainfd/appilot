@@ -39,8 +39,8 @@ class ListResourcesTool(BaseTool):
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        resource_kind = str(input.get("resource_kind")).lower()
-        namespace = str(input.get("namespace")).lower()
+        resource_kind = str(input.get("resource_kind", "")).lower()
+        namespace = str(input.get("namespace", "")).lower()
 
         # Use kubectl directly. Raw API output can easily exceed the LLM rate limit.
         kubectl_get_command = f"kubectl get {resource_kind}"
@@ -91,9 +91,9 @@ class DeleteResourceTool(RequireApprovalTool):
         dyn_client = dynamic.DynamicClient(
             api_client.ApiClient(configuration=config.load_kube_config())
         )
-        resource_kind = input.get("resource_kind")
-        resource_name = input.get("resource_name")
-        namespace = input.get("namespace")
+        resource_kind = input.get("resource_kind", "")
+        resource_name = input.get("resource_name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
         gvk = context.search_api_resource(resource_kind)
@@ -125,9 +125,9 @@ class GetResourceDetailTool(BaseTool):
         dyn_client = dynamic.DynamicClient(
             api_client.ApiClient(configuration=config.load_kube_config())
         )
-        resource_kind = input.get("resource_kind")
-        resource_name = input.get("resource_name")
-        namespace = input.get("namespace")
+        resource_kind = input.get("resource_kind", "")
+        resource_name = input.get("resource_name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
         gvk = context.search_api_resource(resource_kind)
@@ -171,9 +171,9 @@ class GetResourceYamlTool(BaseTool):
         dyn_client = dynamic.DynamicClient(
             api_client.ApiClient(configuration=config.load_kube_config())
         )
-        resource_kind = input.get("resource_kind")
-        resource_name = input.get("resource_name")
-        namespace = input.get("namespace")
+        resource_kind = input.get("resource_kind", "")
+        resource_name = input.get("resource_name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
         gvk = context.search_api_resource(resource_kind)
@@ -215,8 +215,8 @@ class GetServiceAccessEndpointsTool(BaseTool):
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         if namespace == "":
             namespace = "default"
@@ -249,8 +249,8 @@ class GetIngressAccessEndpointsTool(BaseTool):
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         if namespace == "":
             namespace = "default"
@@ -283,8 +283,8 @@ class DescribePodTool(BaseTool):
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
 
@@ -318,8 +318,8 @@ class GetPodLogsTool(BaseTool):
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
         container_name = input.get("container_name", "")
         line_number = input.get("line_number", 50)
 
@@ -352,8 +352,8 @@ class WatchResourcesTool(BaseTool):
 
     def _run(self, query: str) -> str:
         input = json.loads(query)
-        resource_kind = str(input.get("resource_kind")).lower()
-        namespace = str(input.get("namespace")).lower()
+        resource_kind = str(input.get("resource_kind", "")).lower()
+        namespace = str(input.get("namespace", "")).lower()
 
         if namespace == "":
             namespace = "default"
@@ -398,7 +398,7 @@ class ConstructResourceTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        query = input.get("user_query")
+        query = input.get("user_query", "")
         prompt = PromptTemplate(
             template=CONSTRUCT_RESOURCES_TO_CREATE_PROMPT,
             input_variables=["query"],
@@ -421,10 +421,10 @@ class ConstructResourceForUpdateTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        query = input.get("user_query")
-        resource_kind = input.get("resource_kind")
-        resource_name = input.get("resource_name")
-        namespace = input.get("namespace")
+        query = input.get("user_query", "")
+        resource_kind = input.get("resource_kind", "")
+        resource_name = input.get("resource_name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
 
