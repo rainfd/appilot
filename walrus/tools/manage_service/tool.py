@@ -297,9 +297,9 @@ class GetServiceResourceLogsTool(BaseTool):
             input = json.loads(query)
         except Exception as e:
             raise e
-        service_id = input.get("service_id")
-        service_resource_id = input.get("service_resource_id")
-        key = input.get("key")
+        service_id = input.get("service_id", "")
+        service_resource_id = input.get("service_resource_id", "")
+        key = input.get("key", "")
         line_number = input.get("line_number", 100)
 
         project_id = walrus_context.GLOBAL_CONTEXT.project_id
@@ -339,9 +339,9 @@ class GetServiceResourceLogsReturnDirectTool(BaseTool):
             input = json.loads(query)
         except Exception as e:
             raise e
-        service_id = input.get("service_id")
-        service_resource_id = input.get("service_resource_id")
-        key = input.get("key")
+        service_id = input.get("service_id", "")
+        service_resource_id = input.get("service_resource_id", "")
+        key = input.get("key", "")
         line_number = input.get("line_number", 100)
 
         project_id = walrus_context.GLOBAL_CONTEXT.project_id

@@ -14,13 +14,21 @@ from config import config
 from i18n import text
 from agent.agent import create_agent
 from walrus.toolkit import WalrusToolKit
+from k8s.toolkit import KubernetesToolKit
 
 from validation.setup.walrus_server import WalrusTestClient
-from validation.setup.kind import setup_kind, delete_kind_cluster
+from validation.setup.kind import (
+    setup_kind,
+    delete_kind_cluster,
+    get_cluster_kubeconfig,
+    delete_namespaces,
+    create_namespaces
+)
 
 WalrusClient: Optional[WalrusTestClient] = None
 
 WALRUS_KIND_CLUSTER = "walrus-kind-cluster"
+K8S_KIND_CLUSTER = "k8s-kind-cluster"
 
 
 def save_kubeconfig(kubeconfig):
@@ -31,12 +39,16 @@ def save_kubeconfig(kubeconfig):
     return path
 
 
-def appilot_enviroment(api_url, api_key):
+def appilot_enviroment(toolkit):
     """Set default environment variables."""
-    os.environ["TOOLKIT"] = "walrus"
+    # os.environ["TOOLKIT"] = ["walrus", "kubernetes"]
+    os.environ['TOOLKITS'] = toolkit
     os.environ["NATURAL_LANGUAGE"] = "English"
     os.environ["SHOW_REASONS"] = "1"
-    os.environ["VERBOSE"] = "0"
+    os.environ["VERBOSE"] = "1"
+
+
+def walrus_enviroment(api_url, api_key):
 
     """Appilot walrus toolkit environment setup."""
     os.environ["WALRUS_URL"] = api_url
@@ -46,9 +58,15 @@ def appilot_enviroment(api_url, api_key):
     os.environ["WALRUS_DEFAULT_ENVIRONMENT"] = "dev"
 
 
+def kubernetes_enviroment(path):
+    os.environ["KUBECONFIG"] = path
+
+
 def setup_walrus_sandbox():
     # kind
-    kubeconfig = setup_kind(WALRUS_KIND_CLUSTER)
+    clear_walrus_sandbox(["default-" + x for x in ["dev", "test", "qa", "prod"]])
+    setup_kind(WALRUS_KIND_CLUSTER)
+    kubeconfig = get_cluster_kubeconfig(WALRUS_KIND_CLUSTER)
     # walrus
     client = WalrusTestClient()
     client.setup()
@@ -56,13 +74,13 @@ def setup_walrus_sandbox():
     for env in ("test", "dev", "qa"):
         client.create_environment(environment=env)
     # env
-    appilot_enviroment(client.api_url, client.api_key)
+    walrus_enviroment(client.api_url, client.api_key)
 
     global WalrusClient
     WalrusClient = client
 
 
-def destory_walrus_sandbox():
+def destroy_walrus_sandbox():
     global WalrusClient
     if WalrusClient:
         WalrusClient.destory()
@@ -70,9 +88,42 @@ def destory_walrus_sandbox():
     delete_kind_cluster(WALRUS_KIND_CLUSTER)
 
 
-def setup_test_agent(model="gpt-4"):
-    setup_walrus_sandbox()
+def clear_walrus_sandbox(namespaces):
+    global WalrusClient
+    if WalrusClient:
+        WalrusClient.destory()
+    else:
+        WalrusTestClient().destory()
 
+    try:
+        delete_namespaces(WALRUS_KIND_CLUSTER, namespaces)
+    except Exception as e:
+        print(e)
+        return
+
+
+def setup_k8s_sandbox():
+    setup_kind(K8S_KIND_CLUSTER)
+    kubeconfig = get_cluster_kubeconfig(K8S_KIND_CLUSTER)
+    path = save_kubeconfig(kubeconfig)
+    kubernetes_enviroment(path)
+
+
+def clear_k8s_sandbox():
+    namespaces = ["default", "dev", "test", "qa", "prod"]
+    try:
+        delete_namespaces(K8S_KIND_CLUSTER, namespaces)
+    except Exception as e:
+        print(e)
+        return
+    create_namespaces(K8S_KIND_CLUSTER, namespaces)
+
+
+def destroy_k8s_sandbox():
+    delete_kind_cluster(K8S_KIND_CLUSTER)
+
+
+def setup_test_agent(model="gpt-4"):
     config.init()
     colorama.init()
 
@@ -92,11 +143,9 @@ def setup_test_agent(model="gpt-4"):
 
     tools = []
     if "kubernetes" in enabled_toolkits:
-        # kubernetes_toolkit = KubernetesToolKit(llm=llm)
-        # tools.extend(kubernetes_toolkit.get_tools())
-        pass
+        kubernetes_toolkit = KubernetesToolKit(llm=llm)
+        tools.extend(kubernetes_toolkit.get_tools())
     elif "walrus" in enabled_toolkits:
-        # walrus_toolkit = MockWalrusToolkit(llm=llm)
         walrus_toolkit = WalrusToolKit(llm=llm)
         tools.extend(walrus_toolkit.get_tools())
     else:
@@ -112,6 +161,7 @@ def setup_test_agent(model="gpt-4"):
         shared_memory=memory,
         tools=tools,
         verbose=config.APPILOT_CONFIG.verbose,
+        interact=False,
     )
 
     return LangChainWrapperChain(langchain=agent)

@@ -5,6 +5,12 @@ import socket
 import yaml
 import json
 
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+from typing import List
+
+from urllib3.exceptions import HTTPError
+
 
 def setup_kind(cluster: str):
     """Setup kind cluster and return kubeconfig file."""
@@ -45,11 +51,20 @@ networking:
                 raise Exception("Failed to create kind cluster.")
             if cluster in subprocess.check_output("kind get clusters", shell=True).decode():
                 break
-            time.sleep(5)
+            time.sleep(3)
             times -= 1
 
         print(f"Kind cluster {cluster} created.")
 
+    times = 3
+    while not check_cluster_ready(cluster) and times >= 0:
+        if times == 0:
+            raise Exception("Kind cluster is not ready.")
+        time.sleep(5)
+        times -= 1
+
+
+def get_cluster_kubeconfig(cluster: str):
     # get kubeconfig
     # kind get kubeconfig --name test-appilot
     kubeconfig = subprocess.check_output(f"kind get kubeconfig --name {cluster}", shell=True).decode()
@@ -79,3 +94,66 @@ def get_cluster_container(cluster: str):
 def delete_kind_cluster(cluster: str):
     """Delete kind cluster."""
     subprocess.check_output(f"kind delete cluster --name {cluster}", shell=True)
+
+
+def check_cluster_ready(cluster: str) -> bool:
+    kubeconfig = get_cluster_kubeconfig(cluster)
+    config_dict = yaml.safe_load(kubeconfig)
+    # kubernetes load config from string
+    config.load_kube_config_from_dict(config_dict)
+
+    v1 = client.CoreV1Api()
+    try:
+        nodes = v1.list_node()
+        node = nodes.items[0]
+        node_name = node.metadata.name
+        node_conditions = node.status.conditions
+        for condition in node_conditions:
+            if condition.type == "Ready":
+                if condition.status == "True":
+                    print(f"Node {node_name} is Ready")
+                    return True
+                else:
+                    print(f"Node {node_name} is Not Ready")
+                    return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+
+def create_namespaces(cluster: str, namespaces: List[str]):
+    kubeconfig = get_cluster_kubeconfig(cluster)
+    config_dict = yaml.safe_load(kubeconfig)
+    # kubernetes load config from string
+    config.load_kube_config_from_dict(config_dict)
+
+    v1 = client.CoreV1Api()
+
+    for ns in namespaces:
+        body = client.V1Namespace(metadata=client.V1ObjectMeta(name=ns))
+        try:
+            v1.create_namespace(body)
+        except ApiException as e:
+            if e.status == 404:
+                continue
+        except Exception as e:
+            raise e
+
+
+def delete_namespaces(cluster: str, namespace: List[str]):
+    kubeconfig = get_cluster_kubeconfig(cluster)
+    config_dict = yaml.safe_load(kubeconfig)
+    # kubernetes load config from string
+    config.load_kube_config_from_dict(config_dict)
+
+    for ns in namespace:
+        v1 = client.CoreV1Api()
+        try:
+            v1.delete_namespace(ns)
+        except ApiException as e:
+            if e.status == 404:
+                continue
+        except Exception as e:
+            raise e
+
+

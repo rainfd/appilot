@@ -83,6 +83,7 @@ class WalrusTestClient:
             time.sleep(5)
             times -= 1
         self.password = password
+        print("Bootstrap password: ", password)
 
         # get walrus container ip
         inspect = subprocess.check_output(f"docker inspect {CONTAINER}", shell=True).decode().strip()
@@ -108,18 +109,18 @@ class WalrusTestClient:
             if response.status_code == 401:
                 continue
             if response.status_code >= 300:
-                raise Exception("Failed to login to walrus container.")
+                raise Exception("Failed to login to walrus container.", response.status_code)
 
             cookie = response.headers.get('Set-Cookie', None)
             if cookie is None:
                 raise Exception("Failed to get walrus cookie.")
             self.cookie = cookie
 
-            if password == self.password:
+            if password != PASSWORD:
                 self.change_password()
 
         if getattr(self, "cookie", None) is None:
-            raise Exception("Failed to login to walrus container.")
+            raise Exception("Failed to login to walrus container.", password)
 
     def change_password(self):
         """Change password for test."""

@@ -118,8 +118,8 @@ class SearchChartTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        query = input.get("user_query")
-        keyword = input.get("keyword")
+        query = input.get("user_query", "")
+        keyword = input.get("keyword", "")
         chart = searchChart(keyword)
 
         default_values = get_chart_default_values(chart.get("content_url"))
@@ -150,9 +150,9 @@ class DeployApplicationTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        chart_url = input.get("chart_url")
-        name = input.get("name")
-        namespace = input.get("namespace")
+        chart_url = input.get("chart_url", "")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
         if namespace == "":
             namespace = "default"
 
@@ -160,7 +160,7 @@ class DeployApplicationTool(RequireApprovalTool):
             f"helm install {name} {chart_url}  --namespace {namespace}"
         )
 
-        values = input.get("values")
+        values = input.get("values", "")
         if values:
             values = {}
 
@@ -175,7 +175,7 @@ class DeployApplicationTool(RequireApprovalTool):
             os.makedirs(output_directory)
         file_path = f"{output_directory}/values.yaml"
         with open(file_path, "w") as file:
-            yaml.dump(input.get("values"), file)
+            yaml.dump(input.get("values", ""), file)
         helm_install_command += f" -f {file_path}"
 
         try:
@@ -207,9 +207,9 @@ class GenerateUpgradeApplicationValuesTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        namespace = input.get("namespace")
-        name = input.get("name")
-        query = input.get("user_query")
+        namespace = input.get("namespace", "")
+        name = input.get("name", "")
+        query = input.get("user_query", "")
 
         if namespace == "":
             namespace = "default"
@@ -261,9 +261,9 @@ class UpgradeApplicationTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        namespace = input.get("namespace")
-        name = input.get("name")
-        values = input.get("values")
+        namespace = input.get("namespace", "")
+        name = input.get("name", "")
+        values = input.get("values", "")
 
         previous_values = get_helm_release_values(namespace, name)
 
@@ -399,7 +399,7 @@ class ListApplicationsTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        namespace = input.get("namespace")
+        namespace = input.get("namespace", "")
 
         helm_list_command = "helm list --all -o json"
 
@@ -442,8 +442,8 @@ class GetApplicationResourcesTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         if namespace == "":
             namespace = "default"
@@ -500,8 +500,8 @@ class GetApplicationAccessEndpointsTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         helm_manifest_command = f"helm get manifest {name}"
 
@@ -560,8 +560,8 @@ class GetApplicationDetailTool(BaseTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         if namespace == "":
             namespace = "default"
@@ -600,8 +600,8 @@ class DeleteApplicationTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
-        name = input.get("name")
-        namespace = input.get("namespace")
+        name = input.get("name", "")
+        namespace = input.get("namespace", "")
 
         if namespace == "":
             namespace = "default"

@@ -24,7 +24,7 @@ class OutputParser(AgentOutputParser):
         match = re.search(regex, text, re.DOTALL)
         if not match:
             raise OutputParserException(
-                f"Could not parse LLM output: `{text}`"
+                f"Could not parse LLM output: \n`{text}`"
             )
         action = match.group(1)
         action_input = match.group(2)

@@ -3,7 +3,7 @@ from typing import Any
 import readline
 
 
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, ChatGooglePalm, ErnieBotChat
 from langchain.memory import ConversationBufferMemory
 import colorama
 
@@ -14,6 +14,7 @@ from utils import utils
 from agent.agent import create_agent
 from walrus.toolkit import WalrusToolKit
 from k8s.toolkit import KubernetesToolKit
+from llm.base import get_llm
 
 last_error = None
 
@@ -22,9 +23,8 @@ def setup_agent() -> Any:
     config.init()
     colorama.init()
 
-    llm = ChatOpenAI(
-        model_name="gpt-4",
-        temperature=0,
+    llm = get_llm(
+        temperature=0.1,
         callbacks=[handlers.PrintReasoningCallbackHandler()],
     )
 

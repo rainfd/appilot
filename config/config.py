@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 class Config(BaseModel):
     openai_api_key: str
     openai_api_base: str
+    model: str
     natural_language: str
     toolkits: list[str]
     show_reasoning: bool
@@ -23,6 +24,7 @@ def init():
     load_dotenv()
     openai_api_base = utils.get_env("OPENAI_API_BASE")
     openai_api_key = utils.get_env("OPENAI_API_KEY")
+    model = utils.get_env("MODEL", "gpt-4")
     natural_language = utils.get_env("NATURAL_LANGUAGE", "English")
     toolkits = utils.get_env_list("TOOLKITS")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
@@ -40,6 +42,7 @@ def init():
     APPILOT_CONFIG = Config(
         openai_api_base=openai_api_base,
         openai_api_key=openai_api_key,
+        model=model,
         natural_language=natural_language,
         toolkits=toolkits,
         show_reasoning=show_reasoning,

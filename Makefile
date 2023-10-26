@@ -52,5 +52,5 @@ lint:
 #Defines a target named run. This target will run Appilot.
 run:
 	@echo -e "$(COLOR_CYAN)Running Appilot...$(COLOR_RESET)" && \
-	source .venv/bin/activate && \
+	source ./venv/bin/activate && \
 	python3 app.py

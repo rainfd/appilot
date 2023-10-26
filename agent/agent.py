@@ -10,6 +10,7 @@ from langchain.schema.language_model import BaseLanguageModel
 
 from config import config
 from tools.human.tool import HumanTool
+from tools.base.tools import WaitTool
 from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
 from agent.output_parser import OutputParser
 from agent.prompt import (
@@ -21,19 +22,28 @@ from agent.prompt import (
 def create_agent(
     llm: BaseLanguageModel,
     shared_memory: Optional[ReadOnlySharedMemory] = None,
-    tools: list[BaseTool] = [],
+    tools: Optional[list[BaseTool]] = None,
     callback_manager: Optional[BaseCallbackManager] = None,
     verbose: bool = True,
     agent_executor_kwargs: Optional[Dict[str, Any]] = None,
+    interact: bool = True,
     **kwargs: Dict[str, Any],
 ) -> AgentExecutor:
     """Instantiate planner for a given task."""
 
+    if tools is None:
+        tools = []
+
     system_tools = [
-        HumanTool(),
-        ShowReasoningTool(),
-        HideReasoningTool(),
+        WaitTool(),
     ]
+
+    if interact:
+        system_tools.extend([
+            HumanTool(),
+            ShowReasoningTool(),
+            HideReasoningTool(),
+        ])
 
     tools.extend(system_tools)
 
