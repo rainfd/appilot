@@ -1,7 +1,7 @@
 from langchain.chat_models import ChatOpenAI, ChatGooglePalm, ErnieBotChat
-from langchain.llms import Bedrock
 
 from config import config
+from llm.sagemaker import get_sagemaker
 from llm.baidu import get_erniebot
 
 
@@ -17,18 +17,8 @@ def get_llm(*args, **kwargs):
         llm = get_erniebot(**kwargs)
     elif model.startswith("palm"):
         llm = ChatGooglePalm(**kwargs)
-    return llm
-
-def test():
-    # client = boto3.client(
-    #     's3',
-    #     aws_access_key_id=ACCESS_KEY,
-    #     aws_secret_access_key=SECRET_KEY,
-    #     aws_session_token=SESSION_TOKEN
-    # )
-    import boto3
-    boto3.client
-    llm = Bedrock(
-        region_name="us-east-1",
-    )
+    elif model.startswith("aws"):
+        llm = get_sagemaker(**kwargs)
+    else:
+        raise ValueError(f"model {model} is not supported")
     return llm
