@@ -20,16 +20,17 @@ class OutputParser(AgentOutputParser):
             return AgentFinish(
                 {"output": text.split(f"{self.ai_prefix}:")[-1].strip()}, text
             )
-        regex = r"Action: (.*?)[\n]*Action Input: (.*?)\nReason: .*"
+        regex = r"Action: (?P<Action>.*?)([\s]*)(?:Action Input:([\s]*)(?P<Action_Input>.*?)([\s]*))?Reason: (?P<Reason>.*)"
         match = re.search(regex, text, re.DOTALL)
         if not match:
             raise OutputParserException(
                 f"Could not parse LLM output: \n`{text}`"
             )
-        action = match.group(1)
-        action_input = match.group(2)
+        action = match.group("Action").strip()
+        action_input = match.group("Action_Input").strip() if match.group("Action_Input") else ''
+        # reason = match.group("Reason").strip()
         return AgentAction(
-            action.strip(), action_input.strip(" ").strip('"'), text
+            action, action_input, text
         )
 
     @property
