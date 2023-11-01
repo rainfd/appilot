@@ -1,4 +1,5 @@
 from langchain.chat_models import ChatOpenAI, ChatGooglePalm, ErnieBotChat
+from langchain.llms import Tongyi
 
 from config import config
 from llm.sagemaker import get_sagemaker
@@ -19,6 +20,11 @@ def get_llm(*args, **kwargs):
         llm = ChatGooglePalm(**kwargs)
     elif model.startswith("aws"):
         llm = get_sagemaker(**kwargs)
+    elif model.startswith("qwen"):
+        llm = Tongyi(
+            model_name="qwen-14b-chat",
+            **kwargs
+        )
     else:
         raise ValueError(f"model {model} is not supported")
     return llm
