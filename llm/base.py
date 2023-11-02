@@ -10,10 +10,11 @@ def get_llm(*args, **kwargs):
     model = config.APPILOT_CONFIG.model
     llm = None
     if model.startswith("gpt"):
-        llm = ChatOpenAI(
-            model_name="gpt-4",
-            **kwargs,
-        )
+        # llm = ChatOpenAI(
+        #     model_name="gpt-4",
+        #     **kwargs,
+        # )
+        raise Exception("gpt is not supported")
     elif model.startswith("ERNIE-Bot"):
         llm = get_erniebot(**kwargs)
     elif model.startswith("palm"):

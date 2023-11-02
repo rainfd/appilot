@@ -35,14 +35,14 @@ def create_agent(
         tools = []
 
     system_tools = [
-        WaitTool(),
+        # WaitTool(),
     ]
 
     if interact:
         system_tools.extend([
             HumanTool(),
-            ShowReasoningTool(),
-            HideReasoningTool(),
+            # ShowReasoningTool(),
+            # HideReasoningTool(),
         ])
 
     tools.extend(system_tools)

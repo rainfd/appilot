@@ -84,39 +84,41 @@ class WalrusToolKit:
         tools = [
             CurrentContextTool(),
             ChangeContextTool(walrus_client=walrus_client),
-            ListProjectsTool(walrus_client=walrus_client),
-            ListEnvironmentsTool(walrus_client=walrus_client),
-            DeleteEnvironmentsTool(walrus_client=walrus_client),
+            # ListProjectsTool(walrus_client=walrus_client),
+            # ListEnvironmentsTool(walrus_client=walrus_client),
+            # DeleteEnvironmentsTool(walrus_client=walrus_client),
             CloneEnvironmentTool(walrus_client=walrus_client),
 
-            GetEnvironmentDependencyGraphTool(
-                walrus_client=walrus_client, return_direct=True
-            ),
+            # GetEnvironmentDependencyGraphTool(
+            #     walrus_client=walrus_client, return_direct=True
+            # ),
 
             MatchTemplateTool(llm=llm, walrus_client=walrus_client),
             GetTemplateSchemaTool(walrus_client=walrus_client),
-            ConstructServiceToCreateTool(llm=llm, walrus_client=walrus_client),
-            ConstructServiceToUpdateTool(llm=llm, walrus_client=walrus_client),
+            # ConstructServiceToCreateTool(llm=llm, walrus_client=walrus_client),
+            # ConstructServiceToUpdateTool(llm=llm, walrus_client=walrus_client),
             GetServicesTool(walrus_client=walrus_client),
             ListServicesTool(walrus_client=walrus_client),
 
-            WatchServicesTool(walrus_client=walrus_client, return_direct=True),
-            InformServiceReadyTool(
-                walrus_client=walrus_client, return_direct=True
-            ),
+            # WatchServicesTool(walrus_client=walrus_client, return_direct=True),
+            # InformServiceReadyTool(
+            #     walrus_client=walrus_client, return_direct=True
+            # ),
 
-            ListServicesInAllEnvironmentsTool(walrus_client=walrus_client),
-            CreateServiceTool(walrus_client=walrus_client),
-            UpdateServiceTool(walrus_client=walrus_client),
-            DeleteServicesTool(walrus_client=walrus_client),
+            # CreateServiceTool(walrus_client=walrus_client),
+            # UpdateServiceTool(walrus_client=walrus_client),
+
             ListServiceResourcesTool(walrus_client=walrus_client),
             GetServiceResourceLogsTool(walrus_client=walrus_client),
-            GetServiceResourceLogsReturnDirectTool(
-                walrus_client=walrus_client, return_direct=True
-            ),
-            GetServiceAccessEndpointsTool(walrus_client=walrus_client),
 
-            BrowseURLTool(),
-            GetServiceDependencyGraphTool(walrus_client=walrus_client),
+            # ListServicesInAllEnvironmentsTool(walrus_client=walrus_client),
+            # DeleteServicesTool(walrus_client=walrus_client),
+            # GetServiceResourceLogsReturnDirectTool(
+            #     walrus_client=walrus_client, return_direct=True
+            # ),
+            # GetServiceAccessEndpointsTool(walrus_client=walrus_client),
+
+            # BrowseURLTool(),
+            # GetServiceDependencyGraphTool(walrus_client=walrus_client),
         ]
         return tools
